@@ -8,7 +8,7 @@ CORS(app)  # Allow cross-origin requests
 
 # Set paths
 ARABIC_CSV_PATH = r"C:\Users\XMG\Documents\Arabic-Original.csv"  # Update with actual path
-TAMIL_QURAN_FOLDER = r"C:\Users\XMG\Documents\quran"  # Update with actual path
+TAMIL_QURAN_FOLDER = r"quran"  # Update with actual path
 
 # Load Arabic Quran data
 df = pd.read_csv(ARABIC_CSV_PATH, encoding="utf-8", sep="|", header=None,
