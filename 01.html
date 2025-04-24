@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran Chatbot</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background: url("C:/Users/XMG/Downloads/makkah-2.jpg") no-repeat center center fixed;
+            background-size: cover;
+            text-align: center;
+            padding: 20px;
+            color: white;
+        }
+        .container { 
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7); 
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        h1 { color: #FFD700; font-size: 26px; }
+        table { 
+            width: 100%; 
+            margin-bottom: 20px; 
+            border-collapse: collapse; 
+            background: white; 
+            color: black;
+        }
+        th, td { padding: 10px; border: 1px solid black; text-align: left; }
+        th { background: #FFD700; }
+        input, button { 
+            margin: 10px 0; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #ddd;
+            width: 90%; 
+            font-size: 16px;
+        }
+        button { 
+            background: #FFD700;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover { background: #DAA520; }
+        .verses {
+            margin-top: 20px;
+            background: #fff;
+            color: black;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .verse-container {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            position: relative;
+        }
+        .verse-container:last-child {
+            border-bottom: none;
+        }
+        .arabic-text {
+            font-family: 'Traditional Arabic', 'Amiri', serif;
+            font-size: 32px;
+            line-height: 2;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: right;
+            direction: rtl;
+        }
+        .tamil-text {
+            text-align: left;
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            direction: ltr;
+        }
+        .verse-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .verse-number {
+            background: #FFD700;
+            color: black;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .quran-image {
+            position: absolute; /* Keeps it inside the container */
+            top: 50%; /* Center it vertically */
+            right: 10px; /* Move it to the right */
+            transform: translateY(-50%); /* Adjust centering */
+            width: 200px; /* Adjust the size */
+            height: auto; /* Maintain aspect ratio */
+            opacity: 0.8; /* Slight transparency */
+            z-index: 0; /* Keep it behind the table */
+        }
+    </style>
+</head>
+<body ng-app="quranApp" ng-controller="QuranController">
+    <!-- <img src="" alt="Quran" class="quran-image"> -->
+    <div class="container">
+        <h2>📖 Surah Names & Meanings</h2>
+        <table>
+            <tr>
+                <th>Surah Number / சூரா எண்</th>
+                <th>Surah Name (English) / சூரா பெயர் (ஆங்கிலம்)</th>
+                <th>Surah Name (Tamil) / சூரா பெயர் (தமிழ்)</th>
+                <th>English Meaning / அர்த்தம் (ஆங்கிலம்)</th>
+                <th>Tamil Meaning / அர்த்தம் (தமிழ்)</th>
+            </tr>
+            <tr ng-repeat="surah in surahList">
+                <td>{{surah.number}}</td>
+                <td>{{ surah.english }}</td>
+                <td>{{ surah.tamil }}</td>
+                <td>{{ surah.meaningEn }}</td>
+                <td>{{ surah.meaningTa }}</td>
+            </tr>
+        </table>
+        <h1>🕌 Quran Verse Finder</h1>
+        <div>
+            <label>Enter the surah name as shown in the table above:</label>
+            <input type="text" ng-model="surahName" placeholder="Enter surah name (e.g., Al-Fatiha)">
+            <label>🔢 Enter starting Ayah number:</label>
+            <input type="number" ng-model="startAyah" min="1">
+            <label>🔢 Enter ending Ayah number:</label>
+            <input type="number" ng-model="endAyah" min="1">
+            <button ng-click="getAyah()">📖 Get Verses</button>
+        </div>
+
+        <div class="verses" ng-if="verses.length > 0">
+            <h2>🕌 Quran Verses / 📖 குர்ஆன் வசனங்கள்:</h2>
+            <div ng-repeat="ayah in verses" class="verse-container">
+                <div class="verse-header">
+                    <span class="verse-number">Verse {{$index + startAyah}}</span>
+                </div>
+                <div>
+                    <p><strong>📖 Arabic / அரபி:</strong></p>
+                    <p class="arabic-text">{{ayah.arabic}}</p>
+                    <p><strong>🌍 Tamil / தமிழ்:</strong></p>
+                    <p class="tamil-text">{{ayah.tamil}}</p>
+                </div>
+            </div>
+        </div>
+            </div>
+    <script>
+        var app = angular.module('quranApp', []);
+        app.controller('QuranController', function($scope, $http) {
+            $scope.verses = [];
+            $scope.surahList = [
+                { number: 1, english: "Al-Fatiha", tamil: "அல்-பாத்திஹா", meaningEn: "The Opening", meaningTa: "திறப்பு" },
+                { number: 2, english: "Al-Baqarah", tamil: "அல்-பகரா", meaningEn: "The Cow", meaningTa: "மாடு" },
+                { number: 3, english: "Al-Imran", tamil: "ஆல்-இம்ரான்", meaningEn: "The Family of Imran", meaningTa: "இம்ரான் குடும்பம்" },
+                { number: 4, english: "An-Nisa", tamil: "அன்-நிசா", meaningEn: "The Women", meaningTa: "பெண்கள்" },
+                { number: 5, english: "Al-Ma'idah", tamil: "அல்-மாயிதா", meaningEn: "The Table Spread", meaningTa: "மேஜை" },
+                { number: 6, english: "Al-An'am", tamil: "அல்-அன்ஆம்", meaningEn: "The Cattle", meaningTa: "கால்நடைகள்" },
+                { number: 7, english: "Al-A'raf", tamil: "அல்-அராஃப்", meaningEn: "The Heights", meaningTa: "உயர்ந்த இடம்" },
+                { number: 8, english: "Al-Anfal", tamil: "அல்-அன்ஃபால்", meaningEn: "The Spoils of War", meaningTa: "போர் கொள்ளை" },
+                { number: 9, english: "At-Tawbah", tamil: "அத்-தவ்பா", meaningEn: "The Repentance", meaningTa: "மறுமொழி" },
+                { number: 10, english: "Yunus", tamil: "யூனுஸ்", meaningEn: "Prophet Yunus", meaningTa: "யூனுஸ்" },
+                { number: 11, english: "Hud", tamil: "ஹூத்", meaningEn: "Prophet Hud", meaningTa: "ஹூத்" },
+                { number: 12, english: "Yusuf", tamil: "யூசுப்", meaningEn: "Prophet Yusuf", meaningTa: "யூசுப்" },
+                { number: 13, english: "Ar-Ra'd", tamil: "அர்ரஅத்", meaningEn: "The Thunder", meaningTa: "இடியொலி" },
+                { number: 14, english: "Ibrahim", tamil: "இப்ராஹீம்", meaningEn: "Prophet Ibrahim", meaningTa: "இப்ராஹீம்" },
+                { number: 15, english: "Al-Hijr", tamil: "அல்-ஹிஜ்ர்", meaningEn: "The Rocky Tract", meaningTa: "பாறை" },
+                { number: 16, english: "An-Nahl", tamil: "அன்-நஹ்ல்", meaningEn: "The Bee", meaningTa: "தேனீ" },
+                { number: 17, english: "Al-Isra", tamil: "அல்-இஸ்ரா", meaningEn: "The Night Journey", meaningTa: "இரவுப் பயணம்" },
+                { number: 18, english: "Al-Kahf", tamil: "அல்-கஹ்ஃப்", meaningEn: "The Cave", meaningTa: "குகை" },
+                { number: 19, english: "Maryam", tamil: "மர்யம்", meaningEn: "Mary (Mother of Isa)", meaningTa: "மர்யம்" },
+                { number: 20, english: "Taha", tamil: "தாஹா", meaningEn: "One of Prophet Muhammad’s Names", meaningTa: "தாஹா" },
+                { number: 21, english: "Al-Anbiya", tamil: "அல்-அன்பியா", meaningEn: "The Prophets", meaningTa: "தீர்க்கதரிசிகள்" },
+                { number: 22, english: "Al-Hajj", tamil: "அல்-ஹஜ்ஜ்", meaningEn: "The Pilgrimage", meaningTa: "ஹஜ் யாத்திரை" },
+                { number: 23, english: "Al-Mu’minun", tamil: "அல்-முமினூன்", meaningEn: "The Believers", meaningTa: "நம்பிக்கையாளர்கள்" },
+                { number: 24, english: "An-Nur", tamil: "அன்-நூர்", meaningEn: "The Light", meaningTa: "ஒளி" },
+                { number: 25, english: "Al-Furqan", tamil: "அல்-புர்கான்", meaningEn: "The Criterion", meaningTa: "வேறுபடுத்துபவை" },
+                { number: 26, english: "Ash-Shu’ara", tamil: "அஷ்-ஷுஅரா", meaningEn: "The Poets", meaningTa: "கவிஞர்கள்" },
+                { number: 27, english: "An-Naml", tamil: "அன்-நம்ல்", meaningEn: "The Ant", meaningTa: "எறும்புகள்" },
+                { number: 28, english: "Al-Qasas", tamil: "அல்-கசஸ்", meaningEn: "The Stories", meaningTa: "கதை" },
+                { number: 29, english: "Al-Ankabut", tamil: "அல்-அங்கபூத்", meaningEn: "The Spider", meaningTa: "சிலந்தி" },
+                { number: 30, english: "Ar-Rum", tamil: "அல்-ரூம்", meaningEn: "The Romans", meaningTa: "ரோமானியர்கள்" },
+                { number: 31, english: "Luqman", tamil: "லுக்மான்", meaningEn: "Prophet Luqman", meaningTa: "லுக்மான்" },
+                { number: 32, english: "As-Sajdah", tamil: "அல்-ஸஜ்தா", meaningEn: "The Prostration", meaningTa: "தொழுகை" },
+                { number: 33, english: "Al-Ahzab", tamil: "அல்-அஹ்ழாப்", meaningEn: "The Confederates", meaningTa: "கூட்டணிகள்" },
+                { number: 34, english: "Saba", tamil: "சபா", meaningEn: "The People of Sheba", meaningTa: "சபா மக்கள்" },
+                { number: 35, english: "Fatir", tamil: "ஃபாத்திர்", meaningEn: "The Originator", meaningTa: "படைப்பவர்" },
+                { number: 36, english: "Ya-Sin", tamil: "யாஸீன்", meaningEn: "A special name for Prophet Muhammad", meaningTa: "யாஸீன்" },
+                { number: 37, english: "As-Saffat", tamil: "அல்-ஸாஃப்ஃபாத்", meaningEn: "The Ranks", meaningTa: "வரிசையாக நிற்பவர்கள்" },
+                { number: 38, english: "Sad", tamil: "ஸாத்", meaningEn: "Arabic Letter 'Ṣ'", meaningTa: "ஸாத்" },
+                { number: 39, english: "Az-Zumar", tamil: "அல்-சுமர்", meaningEn: "The Groups", meaningTa: "கூட்டங்கள்" },
+                { number: 40, english: "Ghafir", tamil: "ஃகாஃபிர்", meaningEn: "The Forgiver", meaningTa: "மன்னிப்பவன்" },
+                { number: 41, english: "Fussilat", tamil: "ஃபுஸ்ஸிலாத்", meaningEn: "Expounded", meaningTa: "விளக்கப்பட்டவை" },
+                { number: 42, english: "Ash-Shura", tamil: "அஷ்-ஷூரா", meaningEn: "The Consultation", meaningTa: "ஆலோசனை" },
+                { number: 43, english: "Az-Zukhruf", tamil: "அல்-சுக்ருஃப்", meaningEn: "The Gold Adornments", meaningTa: "பொன் ஆபரணங்கள்" },
+                { number: 44, english: "Ad-Dukhan", tamil: "அத்-துகான்", meaningEn: "The Smoke", meaningTa: "புகை" },
+                { number: 45, english: "Al-Jathiyah", tamil: "அல்-ஜாதியா", meaningEn: "The Kneeling", meaningTa: "முடங்கியவர்கள்" },
+                { number: 46, english: "Al-Ahqaf", tamil: "அல்-அஹ்காஃப்", meaningEn: "The Wind-Curved Sandhills", meaningTa: "மணல் மலைகள்" },
+                { number: 47, english: "Muhammad", tamil: "முஹம்மத்", meaningEn: "Prophet Muhammad", meaningTa: "முஹம்மத்" },
+                { number: 48, english: "Al-Fath", tamil: "அல்-பத்", meaningEn: "The Victory", meaningTa: "வெற்றி" },
+                { number: 49, english: "Al-Hujurat", tamil: "அல்-ஹுஜுராத்", meaningEn: "The Chambers", meaningTa: "அறைகள்" },
+                { number: 50, english: "Qaf", tamil: "காஃப்", meaningEn: "Arabic Letter 'Q'", meaningTa: "காஃப்" },
+                { number: 51, english: "Adh-Dhariyat", tamil: "அத்-தாரியாத்", meaningEn: "The Winnowing Winds", meaningTa: "காற்று" },
+                { number: 52, english: "At-Tur", tamil: "அத்-தூர்", meaningEn: "The Mount", meaningTa: "மலை" },
+                { number: 53, english: "An-Najm", tamil: "அல்-நஜ்ம்", meaningEn: "The Star", meaningTa: "நட்சத்திரம்" },
+                { number: 54, english: "Al-Qamar", tamil: "அல்-கமர்", meaningEn: "The Moon", meaningTa: "நிலவு" },
+                { number: 55, english: "Ar-Rahman", tamil: "அர்-ரஹ்மான்", meaningEn: "The Beneficent", meaningTa: "கருணையாளர்" },
+                { number: 56, english: "Al-Waqi’a", tamil: "அல்-வாக்கியா", meaningEn: "The Inevitable", meaningTa: "நிச்சயமானது" },
+                { number: 57, english: "Al-Hadid", tamil: "அல்-ஹதீத்", meaningEn: "The Iron", meaningTa: "இரும்பு" },
+                { number: 58, english: "Al-Mujadila", tamil: "அல்-முஜாதிலா", meaningEn: "The Pleading Woman", meaningTa: "வழக்காடும் பெண்மணி" },
+                { number: 59, english: "Al-Hashr", tamil: "அல்-ஹஷ்ர்", meaningEn: "The Exile", meaningTa: "நடுவேற்றம்" },
+                { number: 60, english: "Al-Mumtahanah", tamil: "அல்-மும்தஹினா", meaningEn: "She That is to be Examined", meaningTa: "சோதிக்கப்படும் பெண்" },
+                { number: 61, english: "As-Saff", tamil: "அஸ்-ஸஃப்", meaningEn: "The Ranks", meaningTa: "வரிசை" },
+                { number: 62, english: "Al-Jumu’a", tamil: "அல்-ஜுமுஆ", meaningEn: "The Congregation", meaningTa: "ஒன்றுகூடல்" },
+                { number: 63, english: "Al-Munafiqun", tamil: "அல்-முனாஃபிகூன்", meaningEn: "The Hypocrites", meaningTa: "முனாஃபிக்கள்" },
+                { number: 64, english: "At-Taghabun", tamil: "அத்-தஃகாபுன்", meaningEn: "The Mutual Disillusion", meaningTa: "பொய்வழு" },
+                { number: 65, english: "At-Talaq", tamil: "அத்-தலாக்", meaningEn: "The Divorce", meaningTa: "விவாகரத்து" },
+                { number: 66, english: "At-Tahrim", tamil: "அத்-தஹ்ரீம்", meaningEn: "The Prohibition", meaningTa: "தடை" },
+                { number: 67, english: "Al-Mulk", tamil: "அல்-முல்க்", meaningEn: "The Sovereignty", meaningTa: "ஆட்சித்துவம்" },
+                { number: 68, english: "Al-Qalam", tamil: "அல்-கலாம்", meaningEn: "The Pen", meaningTa: "பேனா" },
+                { number: 69, english: "Al-Haqqah", tamil: "அல்-ஹாக்கா", meaningEn: "The Reality", meaningTa: "உண்மை" },
+                { number: 70, english: "Al-Ma’arij", tamil: "அல்-மஅரிஜ்", meaningEn: "The Ascending Stairways", meaningTa: "உயர்வுப் படிகள்" },
+                { number: 71, english: "Nuh", tamil: "நூஹ்", meaningEn: "Prophet Nuh", meaningTa: "நூஹ்" },
+                { number: 72, english: "Al-Jinn", tamil: "அல்-ஜின்ன்", meaningEn: "The Jinn", meaningTa: "ஜின்கள்" },
+                { number: 73, english: "Al-Muzzammil", tamil: "அல்-முஸம்மில்", meaningEn: "The Enshrouded One", meaningTa: "மூடப்பட்டவன்" },
+                { number: 74, english: "Al-Muddaththir", tamil: "அல்-முத்தஸ்ஸிர்", meaningEn: "The Cloaked One", meaningTa: "மூடப்பட்டவன்" },
+                { number: 75, english: "Al-Qiyamah", tamil: "அல்-கியாமா", meaningEn: "The Resurrection", meaningTa: "நீர்த்திருவிழா" },
+                { number: 76, english: "Al-Insan", tamil: "அல்-இன்ஸான்", meaningEn: "Man", meaningTa: "மனிதன்" },
+                { number: 77, english: "Al-Mursalat", tamil: "அல்-முர்சலாத்", meaningEn: "The Emissaries", meaningTa: "அனுப்பப்படுவோர்" },
+                { number: 78, english: "An-Naba", tamil: "அன்-நபா", meaningEn: "The Tidings", meaningTa: "செய்தி" },
+                { number: 79, english: "An-Nazi’at", tamil: "அன்-நாஸிஅாத்", meaningEn: "Those Who Drag Forth", meaningTa: "இழுப்பவர்கள்" },
+                { number: 80, english: "Abasa", tamil: "அபசா", meaningEn: "He Frowned", meaningTa: "அவன் முகத்தை சுழித்தான்" },
+                { number: 81, english: "At-Takwir", tamil: "அத்-தக்குவீர்", meaningEn: "The Overthrowing", meaningTa: "சுழற்சி" },
+                { number: 82, english: "Al-Infitar", tamil: "அல்-இன்பிதார்", meaningEn: "The Cleaving", meaningTa: "கிளைபிளவுபடுத்தல்" },
+                { number: 83, english: "Al-Mutaffifin", tamil: "அல்-முதஃபிஃபீன்", meaningEn: "Defrauding", meaningTa: "ஏமாற்றம்" },
+                { number: 84, english: "Al-Inshiqaq", tamil: "அல்-இன்ஷிக்காக்", meaningEn: "The Splitting Open", meaningTa: "பிளவுபடுத்தல்" },
+                { number: 85, english: "Al-Buruj", tamil: "அல்-புரூஜ்", meaningEn: "The Mansions of the Stars", meaningTa: "நட்சத்திரங்களின் மாளிகைகள்" },
+                { number: 86, english: "At-Tariq", tamil: "அத்-தாரிக்", meaningEn: "The Morning Star", meaningTa: "காலை நக்ஷத்திரம்" },
+                { number: 87, english: "Al-A'la", tamil: "அல்-அஅ்லா", meaningEn: "The Most High", meaningTa: "மிக உயர்ந்தவன்" },
+                { number: 88, english: "Al-Ghashiyah", tamil: "அல்-காஷியா", meaningEn: "The Overwhelming", meaningTa: "கைப்பற்றல்" },
+                { number: 89, english: "Al-Fajr", tamil: "அல்-ஃபஜ்ர்", meaningEn: "The Dawn", meaningTa: "விடியல்" },
+                { number: 90, english: "Al-Balad", tamil: "அல்-பலத்", meaningEn: "The City", meaningTa: "நகரம்" },
+                { number: 91, english: "Ash-Shams", tamil: "அஷ்-ஷம்ஸ்", meaningEn: "The Sun", meaningTa: "சூரியன்" },
+                { number: 92, english: "Al-Layl", tamil: "அல்-லயில்", meaningEn: "The Night", meaningTa: "இரவு" },
+                { number: 93, english: "Ad-Duhaa", tamil: "அத்-துஹா", meaningEn: "The Morning Brightness", meaningTa: "காலை ஒளி" },
+                { number: 94, english: "Ash-Sharh", tamil: "அஷ்-ஷர்ஹ்", meaningEn: "The Relief", meaningTa: "மீட்பு" },
+                { number: 95, english: "At-Tin", tamil: "அத்-தீன்", meaningEn: "The Fig", meaningTa: "அத்திப்பழம்" },
+                { number: 96, english: "Al-Alaq", tamil: "அல்-அலக்", meaningEn: "The Clot", meaningTa: "இறைச்சிக் கட்டி" },
+                { number: 97, english: "Al-Qadr", tamil: "அல்-கத்ர்", meaningEn: "The Power", meaningTa: "அதிர்ஷ்ட இரவு" },
+                { number: 98, english: "Al-Bayyinah", tamil: "அல்-பய்யினா", meaningEn: "The Clear Evidence", meaningTa: "வெளிப்படையான சான்று" },
+                { number: 99, english: "Az-Zalzalah", tamil: "அஸ்-ஸல்சலா", meaningEn: "The Earthquake", meaningTa: "நிலநடுக்கம்" },
+                { number: 100, english: "Al-Adiyat", tamil: "அல்-அதியாத்", meaningEn: "The Chargers", meaningTa: "தூண்டுதல்கள்" },
+                { number: 101, english: "Al-Qari’ah", tamil: "அல்-காரிஅ", meaningEn: "The Calamity", meaningTa: "அவலநிலை" },
+                { number: 102, english: "At-Takathur", tamil: "அத்-தகாஸுர்", meaningEn: "The Rivalry in World Increase", meaningTa: "போட்டியீடு" },
+                { number: 103, english: "Al-Asr", tamil: "அல்-அஸ்ர்", meaningEn: "The Time", meaningTa: "நேரம்" },
+                { number: 104, english: "Al-Humazah", tamil: "அல்-ஹுமஸா", meaningEn: "The Slanderer", meaningTa: "தூற்றுபவர்" },
+                { number: 105, english: "Al-Fil", tamil: "அல்-ஃபீல்", meaningEn: "The Elephant", meaningTa: "யானை" },
+                { number: 106, english: "Quraish", tamil: "குரைஷ்", meaningEn: "Quraish Tribe", meaningTa: "குரைஷ் குலம்" },
+                { number: 107, english: "Al-Ma’un", tamil: "அல்-மா’உன்", meaningEn: "The Small Kindnesses", meaningTa: "சிறிய உதவிகள்" },
+                { number: 108, english: "Al-Kawthar", tamil: "அல்-கௌசர்", meaningEn: "The Abundance", meaningTa: "நிறைவான நன்மைகள்" },
+                { number: 109, english: "Al-Kafirun", tamil: "அல்-காஃபிரூன்", meaningEn: "The Disbelievers", meaningTa: "கூளரிக்கொள்பவர்கள்" },
+                { number: 110, english: "An-Nasr", tamil: "அல்-நஸ்ர்", meaningEn: "The Divine Support", meaningTa: "அல்லாஹ்வின் உதவி" },
+                { number: 111, english: "Al-Masad", tamil: "அல்-மசத்", meaningEn: "The Palm Fiber", meaningTa: "நார்ப்பயிர்" },
+                { number: 112, english: "Al-Ikhlas", tamil: "அல்-இக்லாஸ்", meaningEn: "The Sincerity", meaningTa: "தூய்மை" },
+                { number: 113, english: "Al-Falaq", tamil: "அல்-பலக்", meaningEn: "The Daybreak", meaningTa: "விடியற்காலை" },
+                { number: 114, english: "An-Nas", tamil: "அல்-நாஸ்", meaningEn: "The Mankind", meaningTa: "மக்கள்" }
+            ];
+
+            $scope.getAyah = function() {
+                if (!$scope.surahName) {
+                    alert("Please enter a surah name");
+                    return;
+                }
+                if (!$scope.startAyah || !$scope.endAyah) {
+                    alert("Please enter both start and end ayah numbers");
+                    return;
+                }
+                
+                // Find the matching surah from the list
+                var selectedSurah = $scope.surahList.find(function(surah) {
+                    return surah.english.toLowerCase() === $scope.surahName.toLowerCase() || 
+                           surah.tamil === $scope.surahName;
+                });
+
+                if (!selectedSurah) {
+                    alert("Please enter the surah name exactly as shown in the table above");
+                    return;
+                }
+
+                var requestData = {
+                    surah: selectedSurah.english,
+                    startAyah: parseInt($scope.startAyah),
+                    endAyah: parseInt($scope.endAyah)
+                };
+
+                console.log("Sending request with data:", requestData);
+
+                $http.get("http://127.0.0.1:5000/api/quran", { params: requestData })
+                    .then(function(response) {
+                        console.log("Response received:", response.data);
+                        if (response.data.verses && response.data.verses.length > 0) {
+                            $scope.verses = response.data.verses;
+                        } else {
+                            alert("No verses found for the given input. Please check the ayah numbers.");
+                            $scope.verses = [];
+                        }
+                    })
+                    .catch(function(error) {
+                                                console.error("Error details:", error);
+                        alert("Error fetching verses. Please check the surah name and ayah numbers.");
+                        $scope.verses = [];
+                    });
+            };
+        });
+    </script>
+</body>
+</html>
