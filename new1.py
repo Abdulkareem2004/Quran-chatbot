@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
 
 # Set paths
-ARABIC_CSV_PATH = r"C:\Users\XMG\Documents\Arabic-Original.csv"  # Update with actual path
+ARABIC_CSV_PATH = r"Arabic-Original.csv"  # Update with actual path
 TAMIL_QURAN_FOLDER = r"quran"  # Update with actual path
 
 # Load Arabic Quran data
